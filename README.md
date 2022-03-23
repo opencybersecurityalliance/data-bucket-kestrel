@@ -1,4 +1,4 @@
-# Bucket to Store Data for Kestrel Repo, Test, Demo, and More
+# Bucket to Store Data for Kestrel
 
 This is a data repo to lift the burden of storing large data in code repos:
 - [kestrel-lang](https://github.com/opencybersecurityalliance/kestrel-lang)
