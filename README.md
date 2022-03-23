@@ -25,4 +25,4 @@ The repo is initialized with _CC-BY 4.0 License_, while the _CDLA Sharing 1.0 Li
 
 1. Submit a PR with a description of the data and how/where it will be used.
 2. Get approval from one of the maintainers.
-3. Complete.
+3. Refer to the new data in this repo.
