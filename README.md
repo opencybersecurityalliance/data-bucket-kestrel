@@ -20,3 +20,9 @@ GitHub LFS is enabled for directories:
 ## License
 
 The repo is initialized with _CC-BY 4.0 License_, while the _CDLA Sharing 1.0 License_ is under voting at OCA PGB. The plan to shift to CDLA when it is avaliable in OCA.
+
+## How to Contribute
+
+1. Submit a PR with a description of the data and how/where it will be used.
+2. Get approval from one of the maintainers.
+3. Complete.
