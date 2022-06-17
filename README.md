@@ -11,11 +11,12 @@ The data stored here
 - can be referred by URL
 - can be used for any Kestrel-related activities such as testing in CI/CD, demo, display, etc.
 
-## GitHub LFS
+## Use This Repo with GitHub LFS
 
-GitHub LFS is enabled for directories:
-- stix-bundles
-- images
+Follow the instructions on [git-lfs](https://git-lfs.github.com/) before clone this repo:
+1. install `git-lfs` package, e.g., `$ sudo apt install git-lfs`.
+2. setup the lfs extension for your local git command: `$ git lfs install`.
+3. just clone this repo and all data will be there.
 
 ## License
 
