@@ -20,7 +20,7 @@ Follow the instructions on [git-lfs](https://git-lfs.github.com/) before clone t
 
 ## License
 
-The repo is initialized with _CC-BY 4.0 License_, while the _CDLA Sharing 1.0 License_ is under voting at OCA PGB. The plan to shift to CDLA when it is avaliable in OCA.
+_CDLA Sharing 1.0 License_ as detailed in [LICENSE.md](LICENSE.md).
 
 ## How to Contribute
 
