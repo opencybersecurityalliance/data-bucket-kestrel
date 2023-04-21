@@ -12,7 +12,7 @@ The mapping and the data for each index are dumped using
 We are using the `docker` version of `elasticdump` to import/export
 elasticsearch indices.  The following environment variables need to be
 setup to upload data:
- * `$DATA_DIR` - directory where index mapping and data files were extreacted from archive
+ * `$DATA_DIR` - directory where index mapping and data files were extracted from archive
  * `$ES_PWD` - password for the `elastic` user on the elasticsearch instance
  * `$HOST_NAME` - name of the host where elasticsearch instance is running
  * `$HOST_PORT` - port on which elasticsearch instance is listening
@@ -21,7 +21,7 @@ setup to upload data:
 
 ```
 # extract the index mapping and data files from archive
-tar zxf <index_name>.tar.gz
+tar zxf ${dataindex}.tar.gz
 
 # upload index mapping into elasticsearch
 sudo docker run --rm --net=host -e NODE_TLS_REJECT_UNAUTHORIZED=0 \
