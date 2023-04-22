@@ -2,17 +2,36 @@
 
 ## Format
 
-Indexes are dumped using [elastictl](https://github.com/binwiederhier/elastictl).
+Each index archive (`<index_name>.tar.gz`) contains a mapping file
+(`<index_name>.mapping.json`) and a data file (`<index_name>.json`).
+The mapping and the data for each index are dumped using 
+[elasticdump](https://github.com/elasticsearch-dump/elasticsearch-dump).
 
 ## How to import
 
-```
-zcat index.json.gz | elastictl import --host user:pwd@your.elastic.server:9200 index 
-```
+We are using the `docker` version of `elasticdump` to import/export
+elasticsearch indices.  The following environment variables need to be
+setup to upload data:
+ * `$DATA_DIR` - directory where index mapping and data files were extracted from archive
+ * `$ES_PWD` - password for the `elastic` user on the elasticsearch instance
+ * `$HOST_NAME` - name of the host where elasticsearch instance is running
+ * `$HOST_PORT` - port on which elasticsearch instance is listening
+ * `$dataindex` - name of the index to upload (e.g. `linux-91-sysflow-bh22-20220727`,
+   `win-111-winlogbeat-bh22-20220727`, or `win-112-winlogbeat-bh22-20220727`)
 
-Note that the vanilla `elastictl` [does not support HTTPS](https://github.com/binwiederhier/elastictl/issues/4). To import data to Elasticsearch with HTTPS enabled (default in `Elasticsearch >= 8`), please compile the [https branch @ subbyte fork](https://github.com/subbyte/elastictl/tree/https) to use.
+```
+# extract the index mapping and data files from archive
+tar zxf ${dataindex}.tar.gz
 
-If you are using a self-signed certificate, please install that certificate into
-your OS to avoid certificate verification error, e.g., on Debian:
-1. Copy certificate file to `/usr/local/share/ca-certificates`
-2. Run `update-ca-certificates` as root
+# upload index mapping into elasticsearch
+sudo docker run --rm --net=host -e NODE_TLS_REJECT_UNAUTHORIZED=0 \
+     -v "${DATA_DIR}":/tmp elasticdump/elasticsearch-dump \
+     --output=https://"elastic:${ES_PWD}"@"${HOST_NAME}":"${HOST_PORT}"/"${dataindex}" \
+     --input=/tmp/"${dataindex}".mapping.json --type=mapping
+
+# upload index data into elasticsearch
+sudo docker run --rm --net=host -e NODE_TLS_REJECT_UNAUTHORIZED=0 \
+     -v "${DATA_DIR}":/tmp elasticdump/elasticsearch-dump \
+     --output=https://"elastic:${ES_PWD}"@"${HOST_NAME}":"${HOST_PORT}"/"${dataindex}" \
+     --input=/tmp/"${dataindex}".json  --limit 25000  --type=data
+```
