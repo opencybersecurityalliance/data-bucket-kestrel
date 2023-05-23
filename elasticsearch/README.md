@@ -35,3 +35,11 @@ sudo docker run --rm --net=host -e NODE_TLS_REJECT_UNAUTHORIZED=0 \
      --output=https://"elastic:${ES_PWD}"@"${HOST_NAME}":"${HOST_PORT}"/"${dataindex}" \
      --input=/tmp/"${dataindex}".json  --limit 25000  --type=data
 ```
+
+## How to export new data and add to here
+
+0. Have docker environment
+1. Edit parameters in `export.sh` and run the script
+2. Use `sed` to rename the index (on both files)
+3. Compress with `gz` or `xz`, e.g., `tar cJf index.tar.xz *.json`
+4. Upload and make a PR
