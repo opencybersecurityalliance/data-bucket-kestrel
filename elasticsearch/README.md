@@ -23,6 +23,9 @@ setup to upload data:
 # extract the index mapping and data files from archive
 tar zxf ${dataindex}.tar.gz
 
+# for xz files, use the following to decompress
+tar xJf ${dataindex}.tar.xz
+
 # upload index mapping into elasticsearch
 sudo docker run --rm --net=host -e NODE_TLS_REJECT_UNAUTHORIZED=0 \
      -v "${DATA_DIR}":/tmp elasticdump/elasticsearch-dump \
