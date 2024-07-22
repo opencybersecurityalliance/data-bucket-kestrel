@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import pandas
+import numpy
 import sqlite3
 import json
 import argparse
@@ -73,7 +74,13 @@ DROPPED = [
 
 DROPPEDPREFIX = ["winlog.", "sf_file_action."]
 
-INTCOLS = ["network.bytes", "source.port", "destination.port", "process.pid", "process.parent.pid"]
+INTCOLS = [
+    "network.bytes",
+    "source.port",
+    "destination.port",
+    "process.pid",
+    "process.parent.pid",
+]
 
 # condense a list of values into one value to get rid of list
 FUNNEL = {
@@ -126,6 +133,10 @@ def concat_list(xs):
         return xs
 
 
+def unwrap_bracket(x):
+    return x[1:-1] if isinstance(x, str) and x[0] == "{" and x[-1] == "}" else x
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("db")
@@ -137,24 +148,7 @@ if __name__ == "__main__":
     for inputjson in args.inputjsons:
         with open(inputjson) as ndj:
             for jsonline in ndj.readlines():
-                d = json.loads(jsonline)["_source"]
-
-                # add process UUID is not exist
-                # unwrap process UUID is warpped by bracket
-                if "process" in d and "pid" in d["process"]:
-                    if "entity_id" not in d["process"]:
-                        pid = int(d["process"]["pid"])
-                        d["process"]["entity_id"] = str(UUID(int=pid))
-                    elif d["process"]["entity_id"][0] == "{" and  d["process"]["entity_id"][-1] == "}":
-                        d["process"]["entity_id"] = d["process"]["entity_id"][1:-1]
-                    if "parent" in d["process"] and "pid" in d["process"]["parent"]:
-                        if "entity_id" not in d["process"]["parent"]:
-                            pid = int(d["process"]["parent"]["pid"])
-                            d["process"]["parent"]["entity_id"] = str(UUID(int=pid))
-                        elif d["process"]["parent"]["entity_id"][0] == "{" and  d["process"]["entity_id"][-1] == "}":
-                            d["process"]["parent"]["entity_id"] = d["process"]["parent"]["entity_id"][1:-1]
-
-                rows.append(d)
+                rows.append(json.loads(jsonline)["_source"])
 
     # init data
     df = pandas.json_normalize(rows)
@@ -163,14 +157,37 @@ if __name__ == "__main__":
     df = df.drop(columns=DROPPED)
     for PREFIX in DROPPEDPREFIX:
         df = df.drop(columns=[col for col in list(df) if col.startswith(PREFIX)])
+    # fix special char
+    df = df.rename(columns={"@timestamp": "timestamp"})
     # transform some columns
     for c in df:
         df[c] = df[c].apply(delist(c))
+    # unwrap process UUID (fix sysmon data)
+    df["process.entity_id"] = df["process.entity_id"].apply(unwrap_bracket)
+    df["process.parent.entity_id"] = df["process.parent.entity_id"].apply(
+        unwrap_bracket
+    )
     # fix float->int issue
     for c in INTCOLS:
         df[c] = df[c].fillna(-1).astype(int)
-    # fix special char
-    df = df.rename(columns={"@timestamp":"timestamp"})
+    # add process UUID is not exist (fix sysflow data)
+    df["process.entity_id"] = df.apply(
+        lambda x: (
+            str(UUID(int=x["process.pid"]))
+            if x["process.pid"] >= 0 and x["process.entity_id"] is numpy.nan
+            else x["process.entity_id"]
+        ),
+        axis=1,
+    )
+    df["process.parent.entity_id"] = df.apply(
+        lambda x: (
+            str(UUID(int=x["process.parent.pid"]))
+            if x["process.parent.pid"] >= 0
+            and x["process.parent.entity_id"] is numpy.nan
+            else x["process.parent.entity_id"]
+        ),
+        axis=1,
+    )
 
     # print preview
     for k, g in groupby(sorted(list(df)), lambda x: x.split(".")[0]):
