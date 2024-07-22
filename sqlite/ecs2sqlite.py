@@ -6,6 +6,7 @@ import json
 import argparse
 import ipaddress
 from itertools import groupby
+from uuid import UUID
 
 
 DROPPED = [
@@ -136,7 +137,24 @@ if __name__ == "__main__":
     for inputjson in args.inputjsons:
         with open(inputjson) as ndj:
             for jsonline in ndj.readlines():
-                rows.append(json.loads(jsonline)["_source"])
+                d = json.loads(jsonline)["_source"]
+
+                # add process UUID is not exist
+                # unwrap process UUID is warpped by bracket
+                if "process" in d and "pid" in d["process"]:
+                    if "entity_id" not in d["process"]:
+                        pid = int(d["process"]["pid"])
+                        d["process"]["entity_id"] = str(UUID(int=pid))
+                    elif d["process"]["entity_id"][0] == "{" and  d["process"]["entity_id"][-1] == "}":
+                        d["process"]["entity_id"] = d["process"]["entity_id"][1:-1]
+                    if "parent" in d["process"] and "pid" in d["process"]["parent"]:
+                        if "entity_id" not in d["process"]["parent"]:
+                            pid = int(d["process"]["parent"]["pid"])
+                            d["process"]["parent"]["entity_id"] = str(UUID(int=pid))
+                        elif d["process"]["parent"]["entity_id"][0] == "{" and  d["process"]["entity_id"][-1] == "}":
+                            d["process"]["parent"]["entity_id"] = d["process"]["parent"]["entity_id"][1:-1]
+
+                rows.append(d)
 
     # init data
     df = pandas.json_normalize(rows)
