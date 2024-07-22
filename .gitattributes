@@ -3,3 +3,4 @@
 /elasticsearch/*.gz filter=lfs diff=lfs merge=lfs -text
 /elasticsearch/*.xz filter=lfs diff=lfs merge=lfs text
 /elasticsearch/*.json filter=lfs diff=lfs merge=lfs text
+/sqlite/*.db filter=lfs diff=lfs merge=lfs -text
