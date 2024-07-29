@@ -157,8 +157,6 @@ if __name__ == "__main__":
     df = df.drop(columns=DROPPED)
     for PREFIX in DROPPEDPREFIX:
         df = df.drop(columns=[col for col in list(df) if col.startswith(PREFIX)])
-    # fix special char
-    df = df.rename(columns={"@timestamp": "timestamp"})
     # transform some columns
     for c in df:
         df[c] = df[c].apply(delist(c))
